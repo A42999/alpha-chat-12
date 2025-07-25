@@ -31,7 +31,7 @@ const pinned = [
   }
 ]
 
-const GroupProfileScreen: React.FC = () => {
+const GroupChatScreen: React.FC = () => {
   const removeMember = (name: string) => alert(`Removed ${name}`)
   const addMember = () => alert('Opened add member screen')
   const startCall = (type: string) => alert(`${type} call initiated`)
@@ -122,4 +122,4 @@ const GroupProfileScreen: React.FC = () => {
   )
 }
 
-export default GroupProfileScreen
+export default GroupChatScreen
