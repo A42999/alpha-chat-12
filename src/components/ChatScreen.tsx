@@ -1,259 +1,182 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Phone, Video, Smile, Send, Mic, MoreVertical } from 'lucide-react';
-import { Chat, Message } from '../App';
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import {
+  ArrowLeft, Phone, Video, MoreVertical, Smile,
+  Camera, Send, Mic, Wand2, Search
+} from 'lucide-react'
 
-interface ChatScreenProps {
-  chat: Chat;
-  onBack: () => void;
-  onVideoCall: () => void;
-  onContactSelect: (contact: Chat) => void;
-}
+const ChatScreen: React.FC = () => {
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const [message, setMessage] = useState('')
+  const [messages, setMessages] = useState<any[]>([])
+  const [typing, setTyping] = useState(false)
+  const [wallpaper, setWallpaper] = useState('bg-white')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [replyPreview, setReplyPreview] = useState<any | null>(null)
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ chat, onBack, onVideoCall, onContactSelect }) => {
-  const [message, setMessage] = useState('');
-  const [showOptions, setShowOptions] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Ipsum reprehenderit ea nulla velit dolore laborum in id sint tempor et magna tempor veniam. Pariatur cillum venia dolore',
-      timestamp: new Date(),
-      isOwn: false
-    },
-    {
-      id: '2',
-      text: 'Cupidatat exercitation',
-      timestamp: new Date(),
-      isOwn: false
-    },
-    {
-      id: '3',
-      text: 'Mollit excepteur eiusmod conse',
-      timestamp: new Date(),
-      isOwn: true
-    },
-    {
-      id: '4',
-      text: 'Exercitation ea id',
-      timestamp: new Date(),
-      isOwn: true
-    }
-  ]);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const currentUser = {
+    name: 'Daniel Johnson',
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100'
+  }
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    setMessages([
+      { id: 1, text: 'Hi there! 😊', time: '2:30 am', sent: false },
+      { id: 2, text: 'How are you doing today?', time: '2:32 am', sent: false },
+      { id: 3, text: 'Great, thanks! 🔥', time: '2:33 am', sent: true }
+    ])
+    setTyping(true)
+    const timer = setTimeout(() => setTyping(false), 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
+  const handleSend = () => {
+    if (!message.trim()) return
+    setMessages([
+      ...messages,
+      {
+        id: Date.now(),
         text: message,
-        timestamp: new Date(),
-        isOwn: true
-      };
-      setMessages([...messages, newMessage]);
-      setMessage('');
-    }
-  };
+        time: 'Now',
+        sent: true,
+        replyTo: replyPreview?.text || null
+      }
+    ])
+    setMessage('')
+    setReplyPreview(null)
+  }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
+  const handleReaction = (msgId: number, emoji: string) => {
+    alert(`Reacted to message ${msgId} with ${emoji}`)
+  }
+
+  const handleVoiceMessage = () => {
+    alert('🎙️ Voice recording started… (simulated)')
+  }
+
+  const handleWallpaperToggle = () => {
+    setWallpaper(prev => prev === 'bg-white' ? 'bg-gray-50' : 'bg-white')
+  }
+
+  const handleReply = (msg: any) => {
+    setReplyPreview(msg)
+  }
+
+  const handleLongPress = (msg: any) => {
+    const action = prompt(`Actions for message:\n\n1. Reply\n2. Forward\n3. Star\n\nType number:`)
+    if (action === '1') handleReply(msg)
+    else if (action === '2') alert('Message forwarded (simulated)')
+    else if (action === '3') alert('Message starred ✨')
+  }
+
+  const filteredMessages = messages.filter(m =>
+    m.text.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div className={`mobile-container min-h-screen flex flex-col ${wallpaper}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white">
-        <div className="flex items-center space-x-3">
-          <button 
-            onClick={onBack} 
-            className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110 active:scale-95"
-          >
-            <ArrowLeft size={20} className="text-gray-600" />
-          </button>
-          <div className="text-2xl font-light text-blue-500 mr-2" style={{ fontFamily: 'serif' }}>α</div>
-          <button 
-            onClick={() => onContactSelect(chat)}
-            className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 transition-colors"
-          >
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
-                <img 
-                  src={chat.avatar} 
-                  alt={chat.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {chat.isOnline && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800">{chat.name}</h3>
-              <p className={`text-xs ${chat.isOnline ? 'text-blue-500' : 'text-gray-500'}`}>
-                {chat.isOnline ? 'now' : 'last seen recently'}
-              </p>
-            </div>
-          </button>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <button onClick={() => navigate('/')}><ArrowLeft className="w-6 h-6 text-gray-600" /></button>
+          <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-r from-[#4F9DE8] to-[#4F9DE8]">
+            <img src={currentUser.avatar} className="w-full h-full rounded-full border-[3px] border-white" />
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900 text-sm">{currentUser.name}</p>
+            <p className="text-xs text-[#4F9DE8]">{typing ? 'typing...' : 'online'}</p>
+          </div>
         </div>
         <div className="flex items-center space-x-2">
-          <button 
-            className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110 active:scale-95"
-            onClick={onVideoCall}
-          >
-            <Phone size={20} className="text-blue-500" />
-          </button>
-          <button 
-            onClick={onVideoCall}
-            className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110 active:scale-95"
-          >
-            <Video size={20} className="text-blue-500" />
-          </button>
+          <button onClick={() => navigate(`/call/${id}/voice`)}><Phone className="w-5 h-5 text-[#4F9DE8]" /></button>
+          <button onClick={() => navigate(`/call/${id}/video`)}><Video className="w-5 h-5 text-[#4F9DE8]" /></button>
+          <button onClick={handleWallpaperToggle}><Wand2 className="w-5 h-5 text-[#4F9DE8]" /></button>
           <div className="relative">
-            <button 
-              onClick={() => setShowOptions(!showOptions)}
-              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110 active:scale-95"
-            >
-              <MoreVertical size={20} className="text-gray-600" />
-            </button>
-            
-            {showOptions && (
-              <div className="absolute top-12 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 min-w-48 z-10">
-                <button 
-                  onClick={() => onContactSelect(chat)}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  View Contact
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
-                  Media, Links & Docs
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
-                  Search
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
-                  Mute Notifications
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
-                  Wallpaper
-                </button>
-                <div className="border-t border-gray-100 my-1"></div>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors text-red-600">
-                  Block
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors text-red-600">
-                  Delete Chat
-                </button>
+            <button onClick={() => document.getElementById('chat-menu')?.classList.toggle('hidden')}><MoreVertical className="w-5 h-5 text-gray-600" /></button>
+            <div id="chat-menu" className="absolute top-8 right-0 w-56 bg-white border rounded-xl shadow-xl py-2 z-50 hidden">
+              <button className="w-full px-4 py-2 text-left hover:bg-gray-100">View Contact</button>
+              <button className="w-full px-4 py-2 text-left hover:bg-gray-100">Search</button>
+              <button className="w-full px-4 py-2 text-left hover:bg-gray-100">Disappearing Messages</button>
+              <button onClick={handleWallpaperToggle} className="w-full px-4 py-2 text-left hover:bg-gray-100">Wallpaper</button>
+              <div className="border-t border-gray-200 pt-2">
+                <button onClick={() => window.confirm('Clear chat?') && setMessages([])} className="w-full px-4 py-2 text-left text-red-500 hover:bg-red-50">Clear Chat</button>
+                <button onClick={() => window.confirm('Delete chat?') && navigate('/')} className="w-full px-4 py-2 text-left text-red-500 hover:bg-red-50">Delete Chat</button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Search */}
+      <div className="px-4 py-2 border-b border-gray-100 flex items-center space-x-2">
+        <Search className="w-5 h-5 text-gray-400" />
+        <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search messages"
+          className="flex-1 text-sm bg-gray-100 rounded-full px-3 py-1 focus:outline-none" />
+      </div>
+
+      {/* Reply Preview */}
+      {replyPreview && (
+        <div className="px-4 py-2 bg-[#EDF6FF] text-xs text-gray-700 flex justify-between items-center">
+          <span>Replying to: {replyPreview.text}</span>
+          <button onClick={() => setReplyPreview(null)} className="text-[#4F9DE8] font-semibold text-xs">Cancel</button>
+        </div>
+      )}
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-xs px-4 py-2 rounded-2xl ${
-                msg.isOwn
-                  ? 'bg-blue-500 text-white rounded-br-md'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-md'
-              }`}
-            >
-              <p className="text-sm">{msg.text}</p>
+      <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+        {filteredMessages.map(msg => (
+          <div key={msg.id} className={`flex ${msg.sent ? 'justify-end' : 'justify-start'}`}>
+            <div className="relative max-w-[75%]" onContextMenu={(e) => { e.preventDefault(); handleLongPress(msg) }}>
+              <div className="bg-white rounded-xl shadow p-3 text-sm text-gray-800">
+                {msg.replyTo && (
+                  <div className="text-xs text-gray-500 border-l-2 border-[#4F9DE8] pl-2 mb-1">Replying to: {msg.replyTo}</div>
+                )}
+                <p>{msg.text}</p>
+                <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
+                  <span>{msg.time}</span>
+                  {msg.sent && <span className="text-blue-500">✓✓</span>}
+                </div>
+                <div className="mt-2 flex space-x-1">
+                  {['❤️', '🔥', '👍', '🥺'].map((emoji) => (
+                    <button key={emoji} onClick={() => handleReaction(msg.id, emoji)} className="text-sm">{emoji}</button>
+                  ))}
+                </div>
+              </div>
+              <div className={`absolute bottom-0 ${msg.sent ? 'right-0' : 'left-0'}`}>
+                {msg.sent ? (
+                  <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[8px] border-t-transparent translate-x-1"></div>
+                ) : (
+                  <div className="w-0 h-0 border-r-[8px] border-r-white border-t-[8px] border-t-transparent -translate-x-1"></div>
+                )}
+              </div>
             </div>
           </div>
         ))}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="px-4 py-4 border-t border-gray-100 bg-white">
+      <div className="border-t border-gray-200 px-4 py-3">
         <div className="flex items-center space-x-3">
-          <button className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110 active:scale-95">
-            <Smile size={20} className="text-gray-600" />
-          </button>
+          <button onClick={handleVoiceMessage}><Mic className="w-5 h-5 text-gray-600" /></button>
+          <button><Camera className="w-5 h-5 text-gray-600" /></button>
           <div className="flex-1 relative">
             <input
-              type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type a message"
-              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F9DE8]"
             />
+            <button className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Smile className="w-5 h-5 text-gray-400" />
+            </button>
           </div>
-          {message.trim() ? (
-            <button
-              onClick={handleSendMessage}
-              className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-all duration-200 hover:scale-110 active:scale-95"
-            >
-              <Send size={16} className="text-white" />
-            </button>
-          ) : (
-            <button className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-110 active:scale-95">
-              <Mic size={20} className="text-gray-600" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Virtual Keyboard Simulation */}
-      <div className="bg-gray-200 px-4 py-3">
-        <div className="grid grid-cols-10 gap-1 text-sm">
-          {['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'].map((key) => (
-            <button
-              key={key}
-              className="bg-white p-2 rounded text-center hover:bg-gray-100 transition-colors"
-              onClick={() => setMessage(message + key)}
-            >
-              {key}
-            </button>
-          ))}
-        </div>
-        <div className="grid grid-cols-9 gap-1 text-sm mt-1">
-          {['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'].map((key) => (
-            <button
-              key={key}
-              className="bg-white p-2 rounded text-center hover:bg-gray-100 transition-colors"
-              onClick={() => setMessage(message + key)}
-            >
-              {key}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-1 text-sm mt-1">
-          <button className="bg-white p-2 rounded hover:bg-gray-100 flex-1 transition-colors">
-            123
-          </button>
-          <button 
-            className="bg-white p-2 rounded hover:bg-gray-100 flex-1 transition-colors"
-            onClick={() => setMessage(message + ' ')}
-          >
-            space
-          </button>
-          <button 
-            className="bg-blue-400 text-white p-2 rounded hover:bg-blue-500 flex-1 transition-colors"
-            onClick={handleSendMessage}
-          >
-            done
-          </button>
+          <button onClick={handleSend}><Send className="w-5 h-5 text-[#4F9DE8]" /></button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChatScreen;
+export default ChatScreen
