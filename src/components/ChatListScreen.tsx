@@ -67,7 +67,8 @@ const ChatListScreen: React.FC = () => {
             <div className="w-1 h-3 bg-gray-400 rounded-full"></div>
           </div>
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="..." clipRule="evenodd" />
+            {/* Dummy valid path */}
+            <path fillRule="evenodd" d="M3 5h14M3 10h14M3 15h14" clipRule="evenodd" />
           </svg>
           <div className="w-6 h-3 bg-black rounded-sm"></div>
         </div>
@@ -93,7 +94,7 @@ const ChatListScreen: React.FC = () => {
             />
           </button>
           <div className="relative">
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation()
                 const menu = document.getElementById('main-menu')
@@ -102,7 +103,10 @@ const ChatListScreen: React.FC = () => {
             >
               <MoreVertical className="w-6 h-6 text-gray-600" />
             </button>
-            <div className="absolute top-8 right-0 bg-white rounded-lg shadow-lg border py-2 w-48 z-50 hidden" id="main-menu">
+            <div
+              className="absolute top-8 right-0 bg-white rounded-lg shadow-lg border py-2 w-48 z-50 hidden"
+              id="main-menu"
+            >
               <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700">New Group</button>
               <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700">New Broadcast</button>
               <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700">Linked Devices</button>
@@ -135,9 +139,7 @@ const ChatListScreen: React.FC = () => {
                 <h3 className="font-medium text-gray-900 truncate">{chat.name}</h3>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-500">{chat.time}</span>
-                  {chat.unread && (
-                    <div className="w-2 h-2 bg-[#4F9DE8] rounded-full"></div>
-                  )}
+                  {chat.unread && <div className="w-2 h-2 bg-[#4F9DE8] rounded-full"></div>}
                 </div>
               </div>
               <p className="text-sm text-gray-500 truncate mt-1">{chat.message}</p>
@@ -148,7 +150,7 @@ const ChatListScreen: React.FC = () => {
 
       <BottomNavigation activeTab="chats" />
     </div>
-  )
-}
+  );
+};
 
-export default ChatListScreen
+export default ChatListScreen;
