@@ -149,7 +149,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **u-aura**
-- GitHub: [@u-aura](https://github.com/u-aura)
+- GitHub: [https://github.com/A42999/alpha-chat-12)
 
 ## 🙏 Acknowledgments
 
@@ -161,7 +161,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <strong>Made with ❤️ by u-aura</strong>
+  <strong>Made with ❤️ by A42999 </strong>
   <br>
   <sub>⭐ Star this repo if you like it!</sub>
 </div>
